@@ -519,6 +519,10 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
+    // Build share URL for this activity
+    const shareUrl = `${window.location.origin}${window.location.pathname}?activity=${encodeURIComponent(name)}`;
+    const shareText = `Check out this activity at Mergington High School: ${name} – ${details.description}`;
+
     activityCard.innerHTML = `
       ${tagHtml}
       <h4>${name}</h4>
@@ -569,6 +573,31 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
       </div>
+      <div class="share-buttons">
+        <span class="share-label">Share:</span>
+        <a class="share-button share-twitter tooltip"
+           href="https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}"
+           target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter/X">
+          X
+          <span class="tooltip-text">Share on Twitter/X</span>
+        </a>
+        <a class="share-button share-whatsapp tooltip"
+           href="https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}"
+           target="_blank" rel="noopener noreferrer" aria-label="Share on WhatsApp">
+          💬
+          <span class="tooltip-text">Share on WhatsApp</span>
+        </a>
+        <a class="share-button share-email tooltip"
+           href="mailto:?subject=${encodeURIComponent('Activity: ' + name)}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl)}"
+           aria-label="Share via Email">
+          ✉️
+          <span class="tooltip-text">Share via Email</span>
+        </a>
+        <button class="share-button share-copy tooltip" data-share-url="${shareUrl}" aria-label="Copy link">
+          🔗
+          <span class="tooltip-text">Copy link</span>
+        </button>
+      </div>
     `;
 
     // Add click handlers for delete buttons
@@ -586,6 +615,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    // Add click handler for copy link button
+    const copyButton = activityCard.querySelector(".share-copy");
+    copyButton.addEventListener("click", () => {
+      navigator.clipboard.writeText(copyButton.dataset.shareUrl).then(() => {
+        const tooltipText = copyButton.querySelector(".tooltip-text");
+        const original = tooltipText.textContent;
+        tooltipText.textContent = "Copied!";
+        setTimeout(() => {
+          tooltipText.textContent = original;
+        }, 2000);
+      }).catch(() => {
+        showMessage("Could not copy link. Please copy the URL from your browser.", "error");
+      });
+    });
 
     activitiesList.appendChild(activityCard);
   }
@@ -864,5 +908,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize app
   checkAuthentication();
   initializeFilters();
-  fetchActivities();
+  fetchActivities().then(() => {
+    // After activities load, check if a specific activity was shared via URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedActivity = urlParams.get("activity");
+    if (sharedActivity) {
+      // Find and scroll to the card for this activity
+      const cards = activitiesList.querySelectorAll(".activity-card");
+      cards.forEach((card) => {
+        const title = card.querySelector("h4");
+        if (title && title.textContent.trim() === sharedActivity) {
+          card.classList.add("highlight-shared");
+          card.scrollIntoView({ behavior: "smooth", block: "center" });
+          setTimeout(() => card.classList.remove("highlight-shared"), 3000);
+        }
+      });
+    }
+  });
 });
