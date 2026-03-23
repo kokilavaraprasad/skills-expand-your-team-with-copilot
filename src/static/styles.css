@@ -32,6 +32,31 @@
   --info-light: #d1ecf1;
 }
 
+/* Dark mode color overrides */
+body.dark-mode {
+  --background: #1a1a2e;
+  --surface: #16213e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0b0;
+  --border: #2a2a4a;
+  --border-light: #222240;
+  --border-focus: #3a3a5a;
+  --success-light: #1b3a1e;
+  --warning-light: #3a2c00;
+  --error-light: #3a1010;
+  --info-light: #0a2a30;
+}
+
+body.dark-mode .search-box input {
+  background-color: var(--surface);
+  color: var(--text-primary);
+}
+
+body.dark-mode .activity-tag {
+  background: #2a2a50;
+  color: #9fa8da;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -617,6 +642,9 @@ footer {
   position: absolute;
   top: 10px;
   right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 #user-status {
